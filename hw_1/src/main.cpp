@@ -1,7 +1,12 @@
+// NORMAL TASK: Phong Shading
+// EXTRA: TOON SHADING
+
+// TO APPLY TOON SHADING PLEASE ADD `-toon` in args
+
 // Simple OpenGL example for CS184 F06 by Nuttapong Chentanez, modified from sample code for CS184 on Sp06
 // Modified for Realtime-CG class
 
-#define OSX
+#define OSX // FOR MAC MACHINE
 
 #include <vector>
 #include <iostream>
@@ -85,6 +90,7 @@ vector<Light> lights;
 Viewport	viewport;
 int 		drawX = 0;
 int 		drawY = 0;
+bool is_toon = false;
 
 void initScene(){
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Clear to black, fully transparent
@@ -169,7 +175,13 @@ vec3 computeShadedColor(vec3 pos) {
     shaded_color += calculatePhongShader(light.color, light_source, normal, camera_position);
   }
 
-	return shaded_color;
+  if(is_toon) {
+    for(int i=0; i<3; ++i) {
+      shaded_color[i] = (((int) (shaded_color[i] * 10)) * 1.0 / 10);
+    }
+  }
+  
+  return shaded_color;
 }
 
 //****************************************************
@@ -283,45 +295,49 @@ void parseArguments(int argc, char* argv[]) {
 			lights.push_back(light);
 			i+=7;
 		}
+    else if(strcmp(argv[i], "-toon") == 0) {
+      is_toon = true;
+      i += 1;
+    }
 	}
+  printf("DONE\n");
 }
 
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
 int main(int argc, char *argv[]) {
-
 	parseArguments(argc, argv);
 
-  	//This initializes glut
-  	glutInit(&argc, argv);
+  //This initializes glut
+  glutInit(&argc, argv);
 
-  	//This tells glut to use a double-buffered window with red, green, and blue channels
-  	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  //This tells glut to use a double-buffered window with red, green, and blue channels
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 
-  	// Initalize theviewport size
-  	viewport.w = 400;
-  	viewport.h = 400;
+  // Initalize theviewport size
+  viewport.w = 400;
+  viewport.h = 400;
 
-  	//The size and position of the window
-  	glutInitWindowSize(viewport.w, viewport.h);
-  	glutInitWindowPosition(0,0);
-  	glutCreateWindow(argv[0]);
+  //The size and position of the window
+  glutInitWindowSize(viewport.w, viewport.h);
+  glutInitWindowPosition(0,0);
+  glutCreateWindow(argv[0]);
 
-   	// Initialize timer variable
+  // Initialize timer variable
 	#ifdef _WIN32
 	lastTime = GetTickCount();
 	#else
 	gettimeofday(&lastTime, NULL);
 	#endif
 
-  	initScene();							// quick function to set up scene
+  initScene();							// quick function to set up scene
 
-  	glutDisplayFunc(myDisplay);					// function to run when its time to draw something
-  	glutReshapeFunc(myReshape);					// function to run when the window gets resized
-  	glutIdleFunc(myFrameMove);
+  glutDisplayFunc(myDisplay);					// function to run when its time to draw something
+  glutReshapeFunc(myReshape);					// function to run when the window gets resized
+  glutIdleFunc(myFrameMove);
+  
+  glutMainLoop(); // infinite loop that will keep drawing and resizing and whatever else
 
-  	glutMainLoop();							// infinite loop that will keep drawing and resizing and whatever else
-
-  	return 0;
+  return 0;
 }
